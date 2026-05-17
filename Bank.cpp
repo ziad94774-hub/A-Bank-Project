@@ -87,6 +87,23 @@ int userCount=0;
 
   }
 
+
+
+   void saveBanks(){
+   ofstream myFile("bank.txt");
+   
+   if(!myFile){
+     return;
+   }
+
+   for(int i=0;i<bankCount;i++){
+     myFile<<bank[i].bankname<<"    "<<bank[i].place<<"   "<<bank[i].PhoneNum<<"   "<<bank[i].theNameOFTheAccount<<"   "<<bank[i].BankAccount<<"   "<<bank[i].isActive<<"   "<<bank[i].uinqueNumber<<endl;
+
+   }
+    myFile.close();
+
+  }
+
   void inputBank(){
 
   string requiredPrefix[4]={"77","78","71","73"};
@@ -168,19 +185,7 @@ int userCount=0;
 
 }
 
-  void saveBanks(){
-   ofstream myFile("bank.txt");
-   if(!myFile){
-     return;
-   }
-
-   for(int i=0;i<bankCount;i++){
-     myFile<<bank[i].bankname<<"    "<<bank[i].place<<"   "<<bank[i].PhoneNum<<"   "<<bank[i].theNameOFTheAccount<<"   "<<bank[i].BankAccount<<"   "<<bank[i].isActive<<"   "<<bank[i].uinqueNumber<<endl;
-
-   }
-    myFile.close();
-
-  }
+ 
   void bankLoad(){
     ifstream myFile("bank.txt");
     if(!myFile){
@@ -483,9 +488,9 @@ if(!flag){
   }
 
 
-
+//I am ziad Alasadi
   int main(){
-     string ziad=" Ruheef";
+     string ziad="Ruheef";
      cout<<ziad.length();
    	 return 0;
    }
