@@ -39,7 +39,7 @@ const int maxTransfers=200;
    string senderName;//The name of the man who sends the money
    string recipientNumber;
    string senderNumber;
-   string theAmountOfMoney;
+  double theAmountOfMoney;
    string transferingNumber;
 
  };
@@ -51,7 +51,7 @@ const int maxTransfers=200;
 struct Banks{
   string bankname;
   string place;
-  string BankAccount;
+  double  BankAccount;
   string theNameOFTheAccount;
   bool isActive;
   string PhoneNum;
@@ -65,7 +65,7 @@ struct User{
 string name;
 string password;
 string role;
-string bankAccount;
+double bankAccount;
 string  gender;
 bool active;
 string phoneNumber;
@@ -87,7 +87,19 @@ int userCount=0;
 
   }
 
+void saveTransaction(string message){
 
+    ofstream file("transactions.txt", ios::app);
+
+    if(!file){
+        cout<<"Cannot open transaction file"<<endl;
+        return;
+    }
+
+    file << message << endl;
+
+    file.close();
+}
 
    void saveBanks(){
    ofstream myFile("bank.txt");
@@ -109,7 +121,7 @@ int userCount=0;
   string requiredPrefix[4]={"77","78","71","73"};
 
    if (bankCount >= maxBank) {
-        cout << "Sorry you can not add a new bank account!  you have reached the limit" <<maxBank << ").\n";
+        cout<< "Sorry you can not add a new bank account!  you have reached the limit" <<maxBank << ").\n";
     }
     cin.ignore();
     cout<<"Enter the bank name "<<endl;
@@ -117,7 +129,7 @@ int userCount=0;
     cout<<"Enter the bank place"<<endl;
     getline(cin,bank[bankCount].place);
     cout<<" Enter your bank account"<<endl;
-    getline(cin,bank[bankCount].BankAccount);
+    cin>>bank[bankCount].BankAccount;
     cout<<" Enter the name or number of the account"<<endl;
     getline(cin,bank[bankCount].theNameOFTheAccount);
     
@@ -296,7 +308,7 @@ int userCount=0;
     user[userCount].active=active;
 
      cout<<" Enter your bank account"<<endl;
-     getline(cin,user[userCount].bankAccount);
+    cin>>user[userCount].bankAccount;
 
 
       userCount++;//here we add a new book to the array.
@@ -350,9 +362,9 @@ if(!flag){
           getline(cin,uniNumber);
           if (bank[i].uinqueNumber!=uniNumber ){
 
-           string addingMoney;
+           double addingMoney;
            cout<<"Enter the amount of the money"<<endl;
-           getline(cin,addingMoney);
+            cin>>addingMoney;
            bank[i].BankAccount+=addingMoney;
           bank[i].uinqueNumber=uniNumber;
            saveBanks();
@@ -370,7 +382,25 @@ if(!flag){
 
    }
 
+  void bankTakesMoneyFromItsAccount(){
+  string name17;
+  string name18; 
+  cout<<"Enter the name of the bank"<<endl; 
+  getline(cin,name17);
+  cout<<"Enter the name of the account"<<endl; 
+  getline(cin,name18);
+  
+   for(int i=0;i<bankCount;i++){
+    if(name17==bank[i].bankname && name18==bank[i].theNameOFTheAccount){
+    cout<<"We found the account of the bank"<<endl;
+    if (!bank[i].isActive){
 
+    }
+
+    }
+   }
+
+     }
     void addMoneyToYourAccount(){
      string userName;
      string password;
@@ -382,19 +412,57 @@ if(!flag){
      {
       if (userName==user[i].name &&  password==user[i].password)
       {
-        string amount;
+        double amount;
         cout<<"Enter the amount of the money"<<endl;
         cin>>amount;
         user[i].bankAccount+=amount;
+       
+        string message =
+        user[i].name + " deposited " + to_string(amount);
         cout<<"The name :"<<user[i].name<<"Your account is :"<<user[i].bankAccount<<endl;
+        
        saveUser();
+         saveTransaction(message);
       }
       
      }
      cout<<"Sorry we could not find your account"<<endl;
 
     }
+    void takeMoneyFromYourAccount(){
+    string name14;
+    string name15;
+    double name16;
+
+    cout<<"Enter the name"<<endl;
+     getline (cin,name14);
+     cout<<"Enter the  Password"<<endl;
+     getline (cin,name15);
+     for(int i=0;i<userCount;i++){
+     if (name14==user[i].name &&  name15==user[i].password){
+      if(!user[i].active) {
+        cout<<"Sorry this account is not active"<<endl;
+        return;
+      }
+      if (name16 > user[i].bankAccount){
+        cout<<"Insufficient funds"<<endl;
+        return;
+      }
+       cout<<"The bank account of this client: "<<user[i].name<< "is :  "<<user[i].bankAccount<<endl;
+       cout<<"Enter how much do you want"<<endl;
+       cin>>name16;
+       cout<<endl;
+       user[i].bankAccount-=name16;
+       saveUser();
+     }
+     else{
+      cout<<"Sorry we could not find this account "<<endl;
+     }
+   }
+ }
+
     void addMoneyToSomeOne(){
+      double money;
      cout<<"Enter the name of the receiver"<<endl;
      getline(cin,remittance[transferCount].recipientName);
       cout<<"Enter the phone number of the receiver"<<endl;
@@ -404,7 +472,8 @@ if(!flag){
       cout<<"Enter the phone number of the sender"<<endl;
      getline(cin,remittance[transferCount].senderNumber);
      cout<<"Enter the amount of the mouney"<<endl;
-     getline(cin,remittance[transferCount].theAmountOfMoney);
+     cin>>money;
+     remittance[transferCount].theAmountOfMoney=money;
 
      string name1;
      bool flag;
@@ -424,33 +493,40 @@ if(!flag){
      }while(flag);
      remittance[transferCount].transferingNumber = name1;
     transferCount++;
+    string message = remittance[transferCount].senderName + "  transfered money to  " + remittance[transferCount].recipientName  + " With amount of money  " +to_string(money);
     saveTransfer();
     }
 
-    // void takeTheMoneyFromTransfer(){
-    //   string tranNum;
-    //   string name21;
-    //   string name22;
-    //   cout<<"Enter the number of the transfer"<<endl;
-    //   getline(cin,tranNum);
-    //   cout<<"Enter the name of the receiver"<<endl;
-    //   getline(cin,name21);
-    //  cout<<"Enter the phone number of the sender"<<endl;
-    //   getline(cin,name22);
+    void takeTheMoneyFromTransfer(){
+      string tranNum;
+      string name21;
+      string name22;
+      cout<<"Enter the number of the transfer"<<endl;
+      getline(cin,tranNum);
+      cout<<"Enter the name of the receiver"<<endl;
+      getline(cin,name21);
+     cout<<"Enter the phone number of the receiver"<<endl;
+      getline(cin,name22);
+        bool found=false;
+      for(int i=0;i<transferCount;i++){
+       if(tranNum!=remittance[i].transferingNumber){
+        cout<<"Sorry we could not find this one "<<endl;
+        return;
+      }
+      else{
+        found=true;
+       cout<<"the name of the receiver "<<remittance[i].recipientName<<"    the number of the receiver   "<<remittance[i].recipientNumber<<endl; 
+       cout<<"the name of the sender   "<<remittance[i].senderName<<"  the number of the sender  "<<remittance[i].senderNumber<<endl;
+       cout<<"The amount of the money   "<<remittance[i].theAmountOfMoney<<endl;
+       cout<<"The number of the transfer   "<<remittance[i].transferingNumber<<endl;
+       cout<<"Enter an update value to this one "<<endl;
+        cin>>remittance[transferCount].theAmountOfMoney;
+        transferCount--;
+        saveTransfer();
+      }
+      }
 
-    //   for(int i=0;i<transferCount;i++){
-    //    if(tranNum!=remittance[i].transferingNumber){
-    //     cout<<"Sorry we could not find this one "<<endl;
-    //     return;
-    //   }
-    //   else{
-    //      remittance[i].theAmountOfMoney-=remittance[i].theAmountOfMoney;
-    //     transferCount--;
-    //     saveTransfer();}
-    //   }
-
-    // }
-
+    }
   int  loginPage(){
 
 
@@ -487,10 +563,22 @@ if(!flag){
    }while (UserName!=user[userCount].name  &&  Password!=user[userCount].password);
   }
 
+  
+void showTransactions(){
+   ifstream file("transactions.txt"); 
+   if(!file){ 
+    cout<<"No transactions found"<<endl; 
+    return; 
+  } string line;
+   while(getline(file, line))
+   { 
+    cout << line << endl;
+   }
+    file.close();
+ } 
 
 //I am ziad Alasadi
   int main(){
-     string ziad="Ruheef";
-     cout<<ziad.length();
+     showTransactions();
    	 return 0;
    }
