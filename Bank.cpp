@@ -19,7 +19,11 @@
                         //     SetConsoleCursorPosition(hConsole, coord); 
                                //    std::cout << "Hello, World!" << std::endl;
                                   //system(" pause") to stop styling .
-                                  
+                                  //string message = remittance[transferCount-1].senderName * use this if this is a problem in the add money to someone function  *
+                                  //(4)to set the local time  :  auto now=chrono::system_clock::now();//We bring the local time as time point.
+   //  time_t now_time=chrono::system_clock::to_time_t(now);//transform the time_t to be able to print it .
+    // cout<<"The local time "<<ctime(&now_time)<<endl; //now print it as history and time will be read.
+    
 #include<iostream>
 #include<string> 
 #include<fstream>
@@ -27,6 +31,11 @@
 #include<iomanip>
 #include<vector>
 #include<cstdlib>
+#include<windows.h>
+#include <limits>
+#include <chrono>
+#include <cctype>      //for isalpha()
+
 using namespace std;
 
 const int arraySize=100;
@@ -69,7 +78,7 @@ double bankAccount;
 string  gender;
 bool active;
 string phoneNumber;
-string fantasticNumber;
+string fantasticNumber;//This is the name of the account 
 };
 User user[arraySize];
 int userCount=0;
@@ -130,6 +139,7 @@ void saveTransaction(string message){
     getline(cin,bank[bankCount].place);
     cout<<" Enter your bank account"<<endl;
     cin>>bank[bankCount].BankAccount;
+    cin.ignore();
     cout<<" Enter the name or number of the account"<<endl;
     getline(cin,bank[bankCount].theNameOFTheAccount);
     
@@ -138,7 +148,7 @@ void saveTransaction(string message){
       
       cout<<"Enter the status of your activity"<<endl;
        cin>>active;
-
+       cin.ignore();
     }while(active!=0  &&  active!=1);
 
    bank[bankCount].isActive=active;
@@ -345,18 +355,19 @@ if(!flag){
    void addMoneyToBank(){
      string phoneNumber;
      string accountName;
+      bool flag1=false;
      cout<<"Phone number:"<<endl;
      getline(cin,phoneNumber);
      cout<<"The  bank account"<<endl;
      getline(cin,accountName);
-
+    
      for( int i=0;i<bankCount;i++){
         if(bank[i].PhoneNum==phoneNumber && bank[i].theNameOFTheAccount==accountName){
           if(!bank[i].isActive){
              cout<<"The bank  account is stopped"<<endl;
              return;
           }
-
+           flag1=true;
           string uniNumber;
           cout<<"Enter the number of the tranferring "<<endl;
           getline(cin,uniNumber);
@@ -369,6 +380,13 @@ if(!flag){
           bank[i].uinqueNumber=uniNumber;
            saveBanks();
             cout<<"The operation was successfully completed"<<endl;
+            string message =
+            "Bank account " +
+             bank[i].theNameOFTheAccount +
+             " received " +
+            to_string(addingMoney);
+
+           saveTransaction(message);
           }
           else{
 
@@ -377,7 +395,7 @@ if(!flag){
           
         }
      }
-     
+     flag1=false;
    cout<<"Sorry we could not find the bank account"<<endl;
 
    }
@@ -394,38 +412,58 @@ if(!flag){
     if(name17==bank[i].bankname && name18==bank[i].theNameOFTheAccount){
     cout<<"We found the account of the bank"<<endl;
     if (!bank[i].isActive){
-
+     cout<<"Sorry, the bank account is not active"<<endl;
+       return;
     }
 
-    }
-   }
+    else{
+     double money;
+     cout<<"Enter the amount of the money"<<endl;
+     cin>>money;
+     if (money>bank[i].BankAccount){
+      cout<<"Sorry, insufficient funds"<<endl;
+      return;
+     }
+      bank[i].BankAccount-=money;
+      saveBanks();
+      string message =
+      "Bank account :" +bank[i].bankname +" with this account name :" +
+       bank[i].theNameOFTheAccount +
+       " withdrew " +
+       to_string(money);
+
+       saveTransaction(message);
+       cout<<"The operation was successfully completed"<<endl;
+       }
+      }
 
      }
+   }
     void addMoneyToYourAccount(){
      string userName;
-     string password;
+     string fantaNumber;
      cout<<"Enter Your Name"<<endl;
      getline (cin,userName);
      cout<<"Enter YourPassword"<<endl;
-     getline (cin,password);
+     getline (cin,fantaNumber);
      for (int  i = 0; i <userCount; i++)
      {
-      if (userName==user[i].name &&  password==user[i].password)
+      if (userName==user[i].name &&  fantaNumber==user[i].fantasticNumber)
       {
         double amount;
         cout<<"Enter the amount of the money"<<endl;
         cin>>amount;
         user[i].bankAccount+=amount;
-       
+         saveUser();
         string message =
         user[i].name + " deposited " + to_string(amount);
         cout<<"The name :"<<user[i].name<<"Your account is :"<<user[i].bankAccount<<endl;
-        
-       saveUser();
-         saveTransaction(message);
+        cout<<"Deposit completed successfully"<<endl;
+           saveTransaction(message);
+            break;
       }
       
-     }
+    }  
      cout<<"Sorry we could not find your account"<<endl;
 
     }
@@ -444,16 +482,23 @@ if(!flag){
         cout<<"Sorry this account is not active"<<endl;
         return;
       }
-      if (name16 > user[i].bankAccount){
-        cout<<"Insufficient funds"<<endl;
-        return;
-      }
        cout<<"The bank account of this client: "<<user[i].name<< "is :  "<<user[i].bankAccount<<endl;
        cout<<"Enter how much do you want"<<endl;
        cin>>name16;
        cout<<endl;
+
+      if (name16 > user[i].bankAccount){
+        cout<<"Insufficient funds"<<endl;
+        return;
+      }
        user[i].bankAccount-=name16;
        saveUser();
+       string message =
+       user[i].name +
+        " withdrew " +
+         to_string(name16);
+
+      saveTransaction(message);
      }
      else{
       cout<<"Sorry we could not find this account "<<endl;
@@ -473,6 +518,7 @@ if(!flag){
      getline(cin,remittance[transferCount].senderNumber);
      cout<<"Enter the amount of the mouney"<<endl;
      cin>>money;
+     cin.ignore();
      remittance[transferCount].theAmountOfMoney=money;
 
      string name1;
@@ -493,8 +539,15 @@ if(!flag){
      }while(flag);
      remittance[transferCount].transferingNumber = name1;
     transferCount++;
-    string message = remittance[transferCount].senderName + "  transfered money to  " + remittance[transferCount].recipientName  + " With amount of money  " +to_string(money);
-    saveTransfer();
+     saveTransfer();
+     string message =
+     remittance[transferCount-1].senderName +
+     " transferred money to " +
+     remittance[transferCount-1].recipientName +
+     " amount " +
+     to_string(money);
+
+     saveTransaction(message);
     }
 
     void takeTheMoneyFromTransfer(){
@@ -520,9 +573,14 @@ if(!flag){
        cout<<"The amount of the money   "<<remittance[i].theAmountOfMoney<<endl;
        cout<<"The number of the transfer   "<<remittance[i].transferingNumber<<endl;
        cout<<"Enter an update value to this one "<<endl;
-        cin>>remittance[transferCount].theAmountOfMoney;
+        cin>>remittance[i].theAmountOfMoney;
         transferCount--;
         saveTransfer();
+        string message =
+      "The receiver  " +remittance[i].recipientName +" his number "+remittance[i].recipientNumber+" has delivered the money  from the  sender " +remittance[i].senderName +" his number "+remittance[i].senderNumber + " amount "+ to_string(remittance[i].theAmountOfMoney) + " with the transfer number " + remittance[i].transferingNumber;
+        saveTransaction(message);
+       cout<<"The operation was successfully completed"<<endl;
+
       }
       }
 
@@ -576,9 +634,135 @@ void showTransactions(){
    }
     file.close();
  } 
+  void activeUser(){
+   string name45;
+   cout<<"Enter the name "<<endl;
+   getline(cin,name45);
+   for(int i=0;i<userCount;i++){
+     if(user[i].name==name45){
+      if(user[i].active){
+     cout<<"The user is originally active "<<endl;
+      cout<<"*****************************"<<endl;
+       return;
+      }
+      if (!user[i].active){
+      user[i].active=true;
+      saveUser();
+      cout<<"The opration was successfully completed"<<endl;
+       cout<<"*****************************"<<endl;
+      }
+     }
+     else{
+      cout<<"Sorry ,there is no user with this  name"<<endl;
+      cout<<"*****************************"<<endl;
+     }
+   }
 
+  }
+
+  void disactiveUser(){
+   string name54;
+   cout<<"Enter the name"<<endl;
+   getline(cin,name54);
+   for(int i=0;i<userCount;i++){
+    if(name54==user[i].name){
+     if(!user[i].active){
+       cout<<"The user is originally disactive "<<endl;
+         cout<<"*****************************"<<endl;
+       return;
+     }
+    if (user[i].active){
+      user[i].active=false;
+      saveUser();
+      cout<<"The opration was successfully completed"<<endl;
+        cout<<"*****************************"<<endl;
+      }
+
+    }
+    else{
+      cout<<"Sorry ,there is no user with this name "<<endl;
+        cout<<"*****************************"<<endl;
+    }
+   }
+  }
+
+  void deleteUser(){
+     string name700;
+     cout<<"Enter the user name to delete"<<endl;
+     getline(cin,name700);
+     for(int i=0;i<userCount;i++){
+      if (name700==user[i].name){
+      for(int j=i;j<userCount-1;j++){
+      user[j]=user[j+1];
+      userCount--;
+      saveUser();
+       cout<<"The user was deleted successfully"<<endl;
+			 cout<<"--------------------------------------"<<endl;
+				 return;
+      }
+    }
+  }
+  	cout<<"the user is not found"<<endl;  
+		cout<<"--------------------------------------"<<endl;
+}
+
+ void showUsers(){
+   cout<<"THE VIWEING MENU"<<endl;
+   cout<<left<<setw(15)<<"the name"<<setw(15)<<"the role"<<setw(15)<<"the gender"<<setw(15)<<"the phone number "<<setw(10)<<"status"<<endl;
+	 for(int i=0;i<userCount;i++){
+   cout<<left<<setw(15)<<user[i].name<<setw(15)<<user[i].role<<setw(15)<<user[i].gender<<setw(15)<<user[i].phoneNumber<<setw(10)<<( user[i].active ? "avaliable" :"disavaliable")<<endl;
+   }	
+ }
+ void searchTheUserByFantasticNumber(){
+    string name600;
+    cout<<"Enter the fantastic number to search"<<endl;
+    getline(cin,name600);
+    bool ziad=false;
+    for(int i=0;i<userCount;i++){
+    if(name600==user[i].fantasticNumber){
+     ziad=true;
+      cout<<left<<setw(15)<<"the name"<<setw(15)<<"the role"<<setw(15)<<"the gender"<<setw(15)<<"the phone number "<<setw(10)<<"status"<<endl;
+      cout<<left<<setw(15)<<user[i].name<<setw(15)<<user[i].role<<setw(15)<<user[i].gender<<setw(15)<<user[i].phoneNumber<<setw(10)<<( user[i].active ? "avaliable" :"disavaliable")<<endl;
+    }
+    }
+    
+	   if(!ziad)
+	   cout<<"The book is not found"<<endl;
+	   cout<<"**************************************"<<endl;
+ }
+ void numbersOfUsers(){
+  if(userCount>0){
+       	cout<<"the number of the users"<<userCount<<endl;
+       	cout<<"**************************************"<<endl;
+  }
+  else{
+    	cout<<"there are no users yet"<<endl;
+     	cout<<"**************************************"<<endl;
+  }
+ }
+
+ void createPillForClientAndEmployeeAndAdmin(){
+    string name121;
+    string name122;
+    cout<<"Enter Your name"<<endl;
+    getline(cin,name121);
+    cout<<"Enter Your fantastic number"<<endl;
+    getline(cin,name122);
+    bool ziad2=false;
+    for(int i=0;i<userCount;i++){
+     if(name121==user[i].name &&  name122==user[i].fantasticNumber){
+		    	ziad2=true;//for checking from the successful operation
+       addMoneyToYourAccount();
+     }
+
+    }
+
+
+ }
 //I am ziad Alasadi
   int main(){
-     showTransactions();
+     auto now=chrono::system_clock::now();//We bring the local time as time point.
+     time_t now_time=chrono::system_clock::to_time_t(now);//transform the time_t to be able to print it .
+     cout<<"The local time "<<ctime(&now_time)<<endl; //now print it as history and time will be read.
    	 return 0;
    }
